@@ -11,40 +11,44 @@
         v-if="editing"
         @click="editing=false"
       >最终展示</el-button>
-      <el-button size="medium">清空</el-button>
+      <el-button
+        size="medium"
+        @click="componentData = []"
+      >清空</el-button>
       <el-button
         size="medium"
         type="primary"
+        @click="showSchema = true"
       >查看schema</el-button>
     </div>
     <div
+      v-if="!editing"
+      class="playground-demo"
+    >
+      <render-components :componentData="schema"></render-components>
+    </div>
+    <div
+      v-show="editing"
       class="playground"
       :class="{border: showBorder}"
       @drop="handleDrop"
       @dragover="handleDragOver"
     >
-      <el-form
-        :model="ruleForm"
-        status-icon
-        ref="ruleForm"
-        label-width="100px"
-        class="demo-ruleForm"
-      >
+      <el-form label-width="100px">
         <div
           class="field-wrapper"
           :class="{active: item===activeItem}"
           v-for="(item, index) in componentData"
-          :key="item"
+          :key="item.component+index"
         >
           <el-form-item
             :label="item.label"
-            prop="pass"
             @click.native="selectCurComponent($event, item)"
           >
             <component
               :is="item.component"
-              :style="item.style"
-              :propValue="item.propValue"
+              v-bind="item.propValue"
+              v-model="item.propValue.value"
             />
           </el-form-item>
           <el-button-group class="item-actions">
@@ -68,25 +72,47 @@
         </div>
       </el-form>
     </div>
+    <!-- 弹窗 -->
+    <el-dialog
+      title="schema"
+      :visible.sync="showSchema"
+      width="60%"
+    >
+      <pre
+        ref="schema"
+        class="schema-display"
+        contenteditable="true"
+      >{{ this.schema }}</pre>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button @click="() => {showSchema = false;}">取 消</el-button>
+        <el-button
+          type="primary"
+          @click="showSchema = false"
+        >复制</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import ElementUI from "element-ui";
+import RenderComponents from "./renderComponents.vue";
 
 export default {
+  components: {
+    RenderComponents
+  },
   data() {
     return {
+      showSchema: false,
       showBorder: false,
       editing: true,
-      ruleForm: {
-        pass: "",
-        checkPass: "",
-        age: ""
-      },
       componentData: [
         {
-          component: "ElInput",
+          component: "ElSelect",
           label: "表单",
           propValue: {
             value: ""
@@ -95,6 +121,11 @@ export default {
       ],
       activeItem: {}
     };
+  },
+  computed: {
+    schema() {
+      return this.componentData;
+    }
   },
   mounted() {
     // document.addEventListener('ondragend', () => {
@@ -118,6 +149,8 @@ export default {
           value: ""
         }
       });
+      this.activeItem = {};
+      this.editing = true;
     },
     handleDragOver(e) {
       e.preventDefault();
@@ -132,7 +165,8 @@ export default {
       e.path.forEach(item => {
         if (
           item.className &&
-          item.className.indexOf("el-form-item ") > -1 &&
+          item.className.indexOf("el-form-item") > -1 &&
+          item.className.indexOf("el-form-item__") === -1 &&
           item.__vue__
         ) {
           // 找到from-item组件
@@ -147,7 +181,7 @@ export default {
           } = vueComponent;
           // console.log("找到", data, name);
           // console.log("全局组件", ElementUI[name.slice(2)]);
-          this.$emit("show-props", ElementUI[name.slice(2)]);
+          this.$emit("show-props", ElementUI[name.slice(2)], item.propValue);
         }
       });
     },
@@ -156,6 +190,9 @@ export default {
     },
     deleteItem(item, index) {
       this.componentData.splice(index, 1);
+    },
+    changeProps(key, value) {
+      this.$set(this.activeItem.propValue, key, value);
     }
   }
 };
@@ -219,5 +256,9 @@ export default {
 }
 .position-handler {
   cursor: all-scroll;
+}
+.schema-display {
+  height: 300px;
+  overflow: auto;
 }
 </style>
