@@ -109,13 +109,40 @@ export default {
     return {
       showSchema: false,
       showBorder: false,
-      editing: true,
+      editing: false,
       componentData: [
         {
           component: "ElSelect",
           label: "表单",
           propValue: {
-            value: ""
+            value: "",
+            enums: [
+              "a",
+              "b",
+              "c"
+            ],
+            enumNames: [
+              "早",
+              "中",
+              "晚"
+            ],
+          }
+        },
+        {
+          component: "ElRadio",
+          label: "表单",
+          propValue: {
+            value: "",
+            enums: [
+              "a",
+              "b",
+              "c"
+            ],
+            enumNames: [
+              "早",
+              "中",
+              "晚"
+            ],
           }
         }
       ],

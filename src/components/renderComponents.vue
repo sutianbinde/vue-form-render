@@ -17,9 +17,14 @@
     </el-form-item>
   </el-form>
 </template>
-
 <script>
+import ElSelect from '../widgets/select.vue';
+import ElRadio from '../widgets/radio.vue';
 export default {
+  components: {
+    ElSelect,
+    ElRadio
+  },
   props: {
     componentData: {
       type: Array,

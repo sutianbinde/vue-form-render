@@ -43,10 +43,14 @@ export default {
       itemProps: {},
       typeMap: {
         Boolean: (val = false) => ({
+          $id: "ElCheckbox" + Math.floor(Math.random()*1000),
           component: "ElCheckbox",
-          propValue: { value: val }
+          propValue: {
+            value: val,
+          }
         }),
         String: () => ({
+          $id: "ElInput" + Math.floor(Math.random()*1000),
           component: "ElInput",
           propValue: { value: "" }
         })
