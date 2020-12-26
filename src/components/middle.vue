@@ -55,12 +55,12 @@
             />
           </el-form-item>
           <el-button-group class="item-actions">
-            <el-button
+            <!-- <el-button
               type="primary"
               size="mini"
               class="position-handler"
               icon="el-icon-position"
-            ></el-button>
+            ></el-button>-->
             <el-button
               size="mini"
               @click="copyItem(item, index)"
@@ -247,7 +247,7 @@ export default {
       this.componentData.splice(index + 1, 0, {
         ...item,
         propValue: { ...item.propValue },
-        $id: item.name + "_" + Math.floor(Math.random() * 1000)
+        $id: item.component + "_" + Math.floor(Math.random() * 1000)
       });
     },
     /**
