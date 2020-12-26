@@ -140,7 +140,6 @@ export default {
      * 对外方法，设置当前项信息
      */
     setItem(item = {}, elementItem = {}) {
-      console.log("", elementItem, item);
       this.componentName = elementItem.name;
       this.label = item.label;
       this.itemId = item.$id;

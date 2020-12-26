@@ -4,28 +4,34 @@ export default {
   props: {
     enums: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     enumNames: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
-    ...Radio.props,
+    ...Radio.props
   },
-  render () {
+  render() {
     return (
       <div>
-        {
-          this.enums.map((val, index) => {
-            return <el-radio {...{props: {...this.$props, label:val}}} onInput={(value)=>this.$emit('input',value)}>{ this.enumNames[index] }</el-radio>
-          })
-        }
+        {this.enums.map((val, index) => {
+          return (
+            <el-radio
+              {...{
+                props: { ...this.$props, label: val },
+                on: this.$listeners
+              }}
+            >
+              {this.enumNames[index]}
+            </el-radio>
+          );
+        })}
       </div>
     );
   }
-}
+};
 </script>
 
 <style>
-
 </style>

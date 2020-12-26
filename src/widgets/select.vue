@@ -14,10 +14,7 @@ export default {
   },
   render() {
     return (
-      <el-select
-        {...{ props: this.$props }}
-        onInput={value => this.$emit("input", value)}
-      >
+      <el-select {...{ props: this.$props, on: this.$listeners }}>
         {this.enums.map((val, index) => {
           return <el-option value={val} label={this.enumNames[index]} />;
         })}
