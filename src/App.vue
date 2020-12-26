@@ -15,13 +15,14 @@
       <el-col :span="16">
         <app-middle
           ref="middle"
-          @show-props="(item, defaultProps) => {$refs.right.setItem(item, defaultProps)}"
+          @show-props="(item, elementItem) => {$refs.right.setItem(item, elementItem)}"
         ></app-middle>
       </el-col>
       <el-col :span="5">
         <app-right
           ref="right"
           @change="(key, value) => { $refs.middle.changeProps(key, value) }"
+          @item-change="(key, value) => { $refs.middle.changeItem(key, value) }"
         ></app-right>
       </el-col>
     </el-row>

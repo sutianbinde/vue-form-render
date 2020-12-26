@@ -13,7 +13,7 @@
       >最终展示</el-button>
       <el-button
         size="medium"
-        @click="componentData = []"
+        @click="clear"
       >清空</el-button>
       <el-button
         size="medium"
@@ -39,7 +39,7 @@
           class="field-wrapper"
           :class="{active: item===activeItem}"
           v-for="(item, index) in componentData"
-          :key="item.component+index"
+          :key="item.$id"
         >
           <el-form-item
             :label="item.label"
@@ -60,7 +60,7 @@
             ></el-button>
             <el-button
               size="mini"
-              @click="copy(item, index)"
+              @click="copyItem(item, index)"
               icon="el-icon-document-copy"
             ></el-button>
             <el-button
@@ -82,7 +82,13 @@
         ref="schema"
         class="schema-display"
         contenteditable="true"
-      >{{ this.schema }}</pre>
+      >{{ schema }}</pre>
+      <!-- 隐藏input用于复制 -->
+      <textarea
+        class="schema-input"
+        ref="schemaInput"
+        type="text"
+      />
       <span
         slot="footer"
         class="dialog-footer"
@@ -90,7 +96,7 @@
         <el-button @click="() => {showSchema = false;}">取 消</el-button>
         <el-button
           type="primary"
-          @click="showSchema = false"
+          @click="copySchema"
         >复制</el-button>
       </span>
     </el-dialog>
@@ -100,8 +106,8 @@
 <script>
 import ElementUI from "element-ui";
 import RenderComponents from "./renderComponents.vue";
-import ElSelect from '../widgets/select.vue';
-import ElRadio from '../widgets/radio.vue';
+import ElSelect from "../widgets/select.vue";
+import ElRadio from "../widgets/radio.vue";
 export default {
   components: {
     RenderComponents,
@@ -110,45 +116,36 @@ export default {
   },
   data() {
     return {
+      // 显示schema数据
       showSchema: false,
+      // 显示拖拽border
       showBorder: false,
-      editing: false,
+      // 编辑模式
+      editing: true,
+      // 组件数据
       componentData: [
         {
           component: "ElSelect",
-          label: "表单",
+          label: "表单label",
+          $id: "ElSelect_" + Math.floor(Math.random() * 1000),
           propValue: {
             value: "",
-            enums: [
-              "a",
-              "b",
-              "c"
-            ],
-            enumNames: [
-              "早",
-              "中",
-              "晚"
-            ],
+            enums: ["a", "b", "c"],
+            enumNames: ["早", "中", "晚"]
           }
         },
         {
           component: "ElRadio",
-          label: "表单",
+          label: "表单label",
+          $id: "ElRadio_" + Math.floor(Math.random() * 1000),
           propValue: {
             value: "",
-            enums: [
-              "a",
-              "b",
-              "c"
-            ],
-            enumNames: [
-              "早",
-              "中",
-              "晚"
-            ],
+            enums: ["a", "b", "c"],
+            enumNames: ["早", "中", "晚"]
           }
         }
       ],
+      // 当前选中的item
       activeItem: {}
     };
   },
@@ -157,41 +154,58 @@ export default {
       return this.componentData;
     }
   },
-  mounted() {
-    // document.addEventListener('ondragend', () => {
-    //   debugger; // eslint-disable-line
-    //   this.showBorder = false;
-    // });
-  },
+  mounted() {},
   methods: {
+    /**
+     * 拖放
+     */
     handleDrop(e) {
-      // debugger; // eslint-disable-line
       e.preventDefault();
       e.stopPropagation();
       const component = e.dataTransfer.getData("component");
       this.addComponent(component);
     },
+    /**
+     * 向组件数据中添加一个组件
+     * @param { String } name 组件名称
+     */
     addComponent(name) {
-      this.componentData.push({
+      const item = {
         component: name,
-        label: "表单",
+        label: "表单label",
         propValue: {
           value: ""
         }
-      });
-      this.activeItem = {};
+      };
+      item.$id = name + "_" + Math.floor(Math.random() * 1000);
+      if (["ElSelect", "ElRadio"].indexOf(name) > -1) {
+        item.propValue.enums = ["a", "b", "c"];
+        item.propValue.enumNames = ["早", "中", "晚"];
+      }
+
+      this.componentData.push(item);
+      this.clearActive();
       this.editing = true;
     },
+    /**
+     * 拖拽结束
+     */
     handleDragOver(e) {
       e.preventDefault();
       this.showBorder = true;
     },
+    /**
+     * 对外方法，设置是否正在拖拽
+     * @param { Boolean } dragging 是否正在拖拽
+     */
     setDragging(dragging) {
       this.showBorder = dragging;
     },
-    selectCurComponent(e, item) {
-      this.activeItem = item;
-      console.log("鼠标点击", e);
+    /**
+     * 设置选中项
+     */
+    selectCurComponent(e, activeItem) {
+      this.activeItem = activeItem;
       e.path.forEach(item => {
         if (
           item.className &&
@@ -204,25 +218,64 @@ export default {
             $children: [, vueComponent]
           } = item.__vue__;
           const {
-            // _data: data,
             $vnode: {
               componentOptions: { tag: name }
             }
           } = vueComponent;
-          // console.log("找到", data, name);
-          // console.log("全局组件", ElementUI[name.slice(2)]);
-          this.$emit("show-props", ElementUI[name.slice(2)], item.propValue);
+          this.$emit("show-props", this.activeItem, ElementUI[name.slice(2)]);
         }
       });
     },
-    copy(item, index) {
-      this.componentData.splice(index + 1, 0, { ...item, propValue: {...item.propValue} });
+    /**
+     * 复制
+     */
+    copyItem(item, index) {
+      this.componentData.splice(index + 1, 0, {
+        ...item,
+        propValue: { ...item.propValue },
+        $id: item.name + "_" + Math.floor(Math.random() * 1000)
+      });
     },
+    /**
+     * 删除
+     */
     deleteItem(item, index) {
       this.componentData.splice(index, 1);
+      this.clearActive();
     },
+    /**
+     * 清除
+     */
+    clear() {
+      this.componentData = [];
+      this.clearActive();
+    },
+    /**
+     * 对外方法，改变props的值
+     */
     changeProps(key, value) {
       this.$set(this.activeItem.propValue, key, value);
+    },
+    /**
+     * 对外方法，改变item的只值
+     */
+    changeItem(key, value) {
+      this.$set(this.activeItem, key, value);
+    },
+    /**
+     * 清楚当前项
+     */
+    clearActive() {
+      this.activeItem = {};
+      this.$emit("show-props", {}, {});
+    },
+    copySchema() {
+      const input = this.$refs.schemaInput;
+      input.value = JSON.stringify(this.schema, null, 2);
+      input.select(); // 选中文本
+      document.execCommand("copy"); // 执行浏览器复制命令
+      this.$message("复制成功");
+      this.showSchema = false;
     }
   }
 };
@@ -290,5 +343,12 @@ export default {
 .schema-display {
   height: 300px;
   overflow: auto;
+}
+.schema-input {
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  opacity: 0;
+  z-index: -10;
 }
 </style>
