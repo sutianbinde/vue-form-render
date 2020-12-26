@@ -3,6 +3,7 @@
     ref="ruleForm"
     label-width="100px"
     class="demo-ruleForm"
+    :model="model"
   >
     <el-form-item
       v-for="(item, index) in componentData"
@@ -12,14 +13,14 @@
       <component
         :is="item.component"
         v-bind="item.propValue"
-        v-model="item.propValue.value"
+        v-model="model[item.$id]"
       />
     </el-form-item>
   </el-form>
 </template>
 <script>
-import ElSelect from '../widgets/select.vue';
-import ElRadio from '../widgets/radio.vue';
+import ElSelect from "../widgets/select.vue";
+import ElRadio from "../widgets/radio.vue";
 export default {
   components: {
     ElSelect,
@@ -29,6 +30,10 @@ export default {
     componentData: {
       type: Array,
       default: () => []
+    },
+    model: {
+      type: Object,
+      default: () => ({})
     }
   }
 };

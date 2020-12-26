@@ -9,7 +9,7 @@
       <el-button
         size="medium"
         v-if="editing"
-        @click="editing=false"
+        @click="showDemo"
       >最终展示</el-button>
       <el-button
         size="medium"
@@ -25,7 +25,10 @@
       v-if="!editing"
       class="playground-demo"
     >
-      <render-components :componentData="schema"></render-components>
+      <render-components
+        :componentData="demoSchema.schema"
+        :model="demoSchema.model"
+      ></render-components>
     </div>
     <div
       v-show="editing"
@@ -116,6 +119,8 @@ export default {
   },
   data() {
     return {
+      // 用于展示demo的schema数据，
+      demoSchema: {},
       // 显示schema数据
       showSchema: false,
       // 显示拖拽border
@@ -151,11 +156,34 @@ export default {
   },
   computed: {
     schema() {
-      return this.componentData;
+      const schema = [];
+      const model = {};
+      this.componentData.forEach(item => {
+        const newItem = {
+          ...item,
+          propValue: {
+            ...item.propValue
+          }
+        };
+        model[item.$id] = item.propValue.value;
+        delete newItem.propValue.value;
+        schema.push(newItem);
+      });
+      return {
+        schema,
+        model
+      };
     }
   },
   mounted() {},
   methods: {
+    /**
+     * 展示demo
+     */
+    showDemo() {
+      this.demoSchema = JSON.parse(JSON.stringify(this.schema));
+      this.editing = false;
+    },
     /**
      * 拖放
      */
@@ -206,25 +234,11 @@ export default {
      */
     selectCurComponent(e, activeItem) {
       this.activeItem = activeItem;
-      e.path.forEach(item => {
-        if (
-          item.className &&
-          item.className.indexOf("el-form-item") > -1 &&
-          item.className.indexOf("el-form-item__") === -1 &&
-          item.__vue__
-        ) {
-          // 找到from-item组件
-          const {
-            $children: [, vueComponent]
-          } = item.__vue__;
-          const {
-            $vnode: {
-              componentOptions: { tag: name }
-            }
-          } = vueComponent;
-          this.$emit("show-props", this.activeItem, ElementUI[name.slice(2)]);
-        }
-      });
+      this.$emit(
+        "show-props",
+        this.activeItem,
+        ElementUI[this.activeItem.component.slice(2)]
+      );
     },
     /**
      * 复制

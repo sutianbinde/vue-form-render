@@ -4,28 +4,28 @@ export default {
   props: {
     enums: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
     enumNames: {
       type: Array,
-      default: () => [],
+      default: () => []
     },
-    ...Select.props,
+    ...Select.props
   },
-  render () {
+  render() {
     return (
-      <el-select {...{props: this.$props}} onInput={(value)=>this.$emit('input',value)}>
-        {
-          this.enums.map((val, index) => {
-            return <el-option value={val} label={this.enumNames[index]}></el-option>
-          })
-        }
+      <el-select
+        {...{ props: this.$props }}
+        onInput={value => this.$emit("input", value)}
+      >
+        {this.enums.map((val, index) => {
+          return <el-option value={val} label={this.enumNames[index]} />;
+        })}
       </el-select>
     );
   }
-}
+};
 </script>
 
 <style>
-
 </style>
