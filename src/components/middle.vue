@@ -100,10 +100,13 @@
 <script>
 import ElementUI from "element-ui";
 import RenderComponents from "./renderComponents.vue";
-
+import ElSelect from '../widgets/select.vue';
+import ElRadio from '../widgets/radio.vue';
 export default {
   components: {
-    RenderComponents
+    RenderComponents,
+    ElSelect,
+    ElRadio
   },
   data() {
     return {
@@ -213,7 +216,7 @@ export default {
       });
     },
     copy(item, index) {
-      this.componentData.splice(index + 1, 0, { ...item });
+      this.componentData.splice(index + 1, 0, { ...item, propValue: {...item.propValue} });
     },
     deleteItem(item, index) {
       this.componentData.splice(index, 1);
